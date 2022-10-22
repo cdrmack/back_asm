@@ -1,3 +1,47 @@
+pub struct Parser {
+    code: String,
+    line_number: u32,
+}
+
+impl Parser {
+    pub fn new(contents: String) -> Parser {
+        let code = contents;
+        Parser {
+            code,
+            line_number: 1,
+        }
+    }
+
+    pub fn has_more_lines(&self) -> bool {
+        // TODO
+        false
+    }
+
+    pub fn advance(&self) {
+        // TODO
+    }
+
+    // @17 -> 17
+    // @sum -> sum
+    // (LOOP) -> LOOP
+    fn symbol(line: String) -> String {
+        if line.len() < 1 {
+            return String::from("");
+        }
+
+        if line.as_bytes()[0] == b'@' {
+            return String::from(line.get(1..).unwrap());
+        }
+
+        if line.as_bytes()[0] == b'(' {
+            let length = line.len();
+            return String::from(line.get(1..length - 1).unwrap());
+        }
+
+        String::from("")
+    }
+}
+
 pub fn parse(contents: String) -> Vec<String> {
     let mut parsed_result = vec![];
 
@@ -17,26 +61,6 @@ pub fn parse(contents: String) -> Vec<String> {
     }
 
     parsed_result
-}
-
-// @17 -> 17
-// @sum -> sum
-// (LOOP) -> LOOP
-fn symbol(line: String) -> String {
-    if line.len() < 1 {
-        return String::from("");
-    }
-
-    if line.as_bytes()[0] == b'@' {
-        return String::from(line.get(1..).unwrap());
-    }
-
-    if line.as_bytes()[0] == b'(' {
-        let length = line.len();
-        return String::from(line.get(1..length - 1).unwrap());
-    }
-
-    String::from("")
 }
 
 fn should_ignore(line: String) -> bool {
@@ -84,18 +108,18 @@ mod tests {
     #[test]
     fn symbol_number() {
         let line = String::from("@8");
-        assert_eq!("8", symbol(line));
+        assert_eq!("8", Parser::symbol(line));
     }
 
     #[test]
     fn symbol_text() {
         let line = String::from("@sum");
-        assert_eq!("sum", symbol(line));
+        assert_eq!("sum", Parser::symbol(line));
     }
 
     #[test]
     fn symbol_symbol() {
         let line = String::from("(LOOP)");
-        assert_eq!("LOOP", symbol(line));
+        assert_eq!("LOOP", Parser::symbol(line));
     }
 }

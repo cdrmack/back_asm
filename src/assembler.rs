@@ -7,7 +7,11 @@ use crate::parser;
 pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.filename)?;
 
-    parser::parse(contents);
+    let parser = parser::Parser::new(contents);
+
+    while parser.has_more_lines() {
+        // TODO
+    }
 
     Ok(())
 }
