@@ -1,30 +1,60 @@
 pub struct Parser {
-    code: String,
-    line_number: u32,
+    pub lines: Vec<String>,
+    pub line_number: u32,
 }
 
 impl Parser {
     pub fn new(contents: String) -> Parser {
         let code = contents;
+        let mut lines: Vec<String> = vec![];
+
+        for line in code.lines() {
+            lines.push(String::from(line));
+        }
+
         Parser {
-            code,
-            line_number: 1,
+            lines,
+            line_number: 0,
         }
     }
 
     pub fn has_more_lines(&self) -> bool {
-        // TODO
-        false
+        return self.line_number + 1 < self.lines.len() as u32;
     }
 
-    pub fn advance(&self) {
-        // TODO
+    pub fn advance(&mut self) {
+        if self.has_more_lines() == false {
+            return;
+        }
+
+        let mut current_line_index = self.line_number as usize;
+        current_line_index += 1;
+        let mut line = &self.lines[current_line_index];
+
+        // skip empty lines and comments
+        while should_ignore(&line) {
+            if current_line_index + 1 < self.lines.len() {
+                current_line_index += 1;
+                line = &self.lines[current_line_index];
+            } else {
+                return;
+            }
+        }
+
+        self.line_number = current_line_index as u32;
     }
 
     // @17 -> 17
     // @sum -> sum
     // (LOOP) -> LOOP
-    fn symbol(line: String) -> String {
+    pub fn symbol(&self) -> String {
+        if self.line_number as usize >= self.lines.len() {
+            return String::from("");
+        }
+
+        // trim line to remove whitespaces
+        let line = &self.lines[self.line_number as usize].trim();
+
         if line.len() < 1 {
             return String::from("");
         }
@@ -42,28 +72,7 @@ impl Parser {
     }
 }
 
-pub fn parse(contents: String) -> Vec<String> {
-    let mut parsed_result = vec![];
-
-    for line in contents.lines() {
-        // remove white spaces
-        let trimmed_line = line.trim();
-
-        if should_ignore(String::from(trimmed_line)) {
-            // noop
-        } else {
-            parsed_result.push(String::from(trimmed_line));
-        }
-    }
-
-    for element in parsed_result.iter() {
-        println!("{}", element);
-    }
-
-    parsed_result
-}
-
-fn should_ignore(line: String) -> bool {
+fn should_ignore(line: &String) -> bool {
     // ignore empty lines
     if line.len() < 1 {
         return true;
@@ -83,43 +92,129 @@ mod tests {
 
     #[test]
     fn ignore_empty_line() {
-        let line = String::from("");
-        assert_eq!(true, should_ignore(line));
+        let contents = String::from("");
+        let parser = Parser::new(contents);
+        assert_eq!("", parser.symbol());
     }
 
     #[test]
     fn ignore_comments() {
-        let line = String::from("// FOO");
-        assert_eq!(true, should_ignore(line));
-    }
-
-    #[test]
-    fn valid_code() {
-        let line = String::from("D=M");
-        assert_eq!(false, should_ignore(line));
-    }
-
-    #[test]
-    fn valid_symbol() {
-        let line = String::from("@8");
-        assert_eq!(false, should_ignore(line));
+        let contents = String::from("// FOO");
+        let parser = Parser::new(contents);
+        assert_eq!("", parser.symbol());
     }
 
     #[test]
     fn symbol_number() {
-        let line = String::from("@8");
-        assert_eq!("8", Parser::symbol(line));
+        let contents = String::from("@8");
+        let parser = Parser::new(contents);
+        assert_eq!("8", parser.symbol());
     }
 
     #[test]
     fn symbol_text() {
-        let line = String::from("@sum");
-        assert_eq!("sum", Parser::symbol(line));
+        let contents = String::from("@sum");
+        let parser = Parser::new(contents);
+        assert_eq!("sum", parser.symbol());
     }
 
     #[test]
-    fn symbol_symbol() {
-        let line = String::from("(LOOP)");
-        assert_eq!("LOOP", Parser::symbol(line));
+    fn symbol_label() {
+        let contents = String::from("(LOOP)");
+        let parser = Parser::new(contents);
+        assert_eq!("LOOP", parser.symbol());
+    }
+
+    #[test]
+    fn symbol_ignore_whitespaces() {
+        let contents = String::from("    @8 ");
+        let parser = Parser::new(contents);
+        assert_eq!("8", parser.symbol());
+    }
+
+    #[test]
+    fn has_more_lines_empty() {
+        let contents = String::from("");
+        let parser = Parser::new(contents);
+        assert_eq!(false, parser.has_more_lines());
+    }
+
+    #[test]
+    fn has_more_lines_one_line() {
+        let contents = String::from("@foo");
+        let parser = Parser::new(contents);
+        assert_eq!(false, parser.has_more_lines());
+    }
+
+    #[test]
+    fn has_more_lines_two_lines() {
+        let contents = String::from(
+            "@foo
+@bar",
+        );
+        let parser = Parser::new(contents);
+        assert_eq!(true, parser.has_more_lines());
+    }
+
+    #[test]
+    fn has_more_lines_include_empty_line() {
+        let contents = String::from(
+            "@foo
+
+",
+        );
+        let parser = Parser::new(contents);
+        assert_eq!(true, parser.has_more_lines());
+    }
+
+    #[test]
+    fn advance_two_lines() {
+        let contents = String::from(
+            "@foo
+@bar",
+        );
+        let mut parser = Parser::new(contents);
+        assert_eq!(true, parser.has_more_lines());
+        parser.advance();
+        assert_eq!(false, parser.has_more_lines());
+    }
+
+    #[test]
+    fn advance_ignore_empty_lines() {
+        let contents = String::from(
+            "@foo
+
+@bar",
+        );
+        let mut parser = Parser::new(contents);
+
+        assert_eq!("foo", parser.symbol());
+        parser.advance();
+        assert_eq!("bar", parser.symbol());
+    }
+
+    #[test]
+    fn advance_ignore_empty_lines_at_the_end() {
+        let contents = String::from(
+            "@foo
+
+@bar
+
+",
+        );
+        let mut parser = Parser::new(contents);
+        assert_eq!("foo", parser.symbol());
+        parser.advance();
+        assert_eq!("bar", parser.symbol());
+        parser.advance();
+        assert_eq!(2, parser.line_number);
+        assert_eq!("bar", parser.symbol());
+    }
+
+    #[test]
+    fn ignore_non_symbols() {
+        let contents = String::from("D=M");
+        let parser = Parser::new(contents);
+        assert_eq!("", parser.symbol());
     }
 }
