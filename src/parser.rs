@@ -3,6 +3,13 @@ pub struct Parser {
     pub line_number: u32,
 }
 
+#[derive(Debug, PartialEq)]
+pub enum InstructionType {
+    AINSTRUCTION,
+    CINSTRUCTION,
+    LINSTRUCTION,
+}
+
 impl Parser {
     pub fn new(contents: String) -> Parser {
         let code = contents;
@@ -16,6 +23,19 @@ impl Parser {
             lines,
             line_number: 0,
         }
+    }
+
+    // assumed we are on valid instruction already
+    pub fn instruction_type(&self) -> InstructionType {
+        let line = &self.lines[self.line_number as usize].trim();
+
+        if line.as_bytes()[0] == b'@' {
+            return InstructionType::AINSTRUCTION;
+        } else if line.as_bytes()[0] == b'(' {
+            return InstructionType::LINSTRUCTION;
+        }
+
+        InstructionType::CINSTRUCTION
     }
 
     pub fn has_more_lines(&self) -> bool {
@@ -49,6 +69,10 @@ impl Parser {
     // (LOOP) -> LOOP
     pub fn symbol(&self) -> String {
         if self.line_number as usize >= self.lines.len() {
+            return String::from("");
+        }
+
+        if self.instruction_type() == InstructionType::CINSTRUCTION {
             return String::from("");
         }
 
@@ -216,5 +240,33 @@ mod tests {
         let contents = String::from("D=M");
         let parser = Parser::new(contents);
         assert_eq!("", parser.symbol());
+    }
+
+    #[test]
+    fn return_ainstruction_number() {
+        let contents = String::from("@8");
+        let parser = Parser::new(contents);
+        assert_eq!(InstructionType::AINSTRUCTION, parser.instruction_type());
+    }
+
+    #[test]
+    fn return_ainstruction_symbol() {
+        let contents = String::from("@foo");
+        let parser = Parser::new(contents);
+        assert_eq!(InstructionType::AINSTRUCTION, parser.instruction_type());
+    }
+
+    #[test]
+    fn return_linstruction() {
+        let contents = String::from("(FOO)");
+        let parser = Parser::new(contents);
+        assert_eq!(InstructionType::LINSTRUCTION, parser.instruction_type());
+    }
+
+    #[test]
+    fn return_cinstruction_() {
+        let contents = String::from("D=M");
+        let parser = Parser::new(contents);
+        assert_eq!(InstructionType::CINSTRUCTION, parser.instruction_type());
     }
 }
