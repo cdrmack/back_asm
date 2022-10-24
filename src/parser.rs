@@ -94,6 +94,44 @@ impl Parser {
 
         String::from("")
     }
+
+    // X= or X;
+    pub fn dest(&self) -> String {
+        if self.instruction_type() != InstructionType::CINSTRUCTION {
+            println!("parser::dest, wrong instruction");
+            return String::from("");
+        }
+
+        // trim line to remove whitespaces
+        let line = &self.lines[self.line_number as usize].trim();
+
+        let mut symbols: Vec<&str> = vec![];
+
+        match line.find("=") {
+            None => {
+                println!("= not found");
+                match line.find(";") {
+                    None => {
+                        println!("; not found");
+                    }
+                    Some(index) => {
+                        println!("; found at {}", index);
+                        symbols = line.split(";").collect();
+                    }
+                }
+            }
+            Some(index) => {
+                println!("= found at {}", index);
+                symbols = line.split("=").collect();
+            }
+        }
+
+        if symbols.is_empty() {
+            return String::from("");
+        }
+
+        String::from(symbols[0])
+    }
 }
 
 fn should_ignore(line: &String) -> bool {
@@ -268,5 +306,42 @@ mod tests {
         let contents = String::from("D=M");
         let parser = Parser::new(contents);
         assert_eq!(InstructionType::CINSTRUCTION, parser.instruction_type());
+    }
+
+    #[test]
+    fn dest_01() {
+        let contents = String::from("D=M");
+        let parser = Parser::new(contents);
+        assert_eq!("D", parser.dest());
+    }
+
+    #[test]
+    fn dest_02() {
+        let contents = String::from("0;JMP");
+        let parser = Parser::new(contents);
+        assert_eq!("0", parser.dest());
+    }
+
+    #[test]
+    fn dest_03() {
+        let contents = String::from("@foo"); // wrong instruction
+        let parser = Parser::new(contents);
+        assert_eq!("", parser.dest());
+    }
+
+    #[test]
+    fn dest_04() {
+        let contents = String::from(
+            "D=M
+// comment
+@foo
+M=M+D",
+        );
+        let mut parser = Parser::new(contents);
+        assert_eq!("D", parser.dest());
+        parser.advance(); // @foo
+        assert_eq!("", parser.dest()); // wrong instruction
+        parser.advance(); // M=M+D
+        assert_eq!("M", parser.dest());
     }
 }
