@@ -2,6 +2,7 @@ use std::env;
 use std::process;
 
 mod assembler;
+mod code;
 mod config;
 mod parser;
 

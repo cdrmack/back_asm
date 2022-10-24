@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fs;
 
+use crate::code;
 use crate::config;
 use crate::parser;
 use crate::parser::InstructionType;
@@ -23,7 +24,11 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
                 println!("L-INSTRUCTION");
                 parser.symbol();
             }
-            InstructionType::CINSTRUCTION => println!("C-INSTRUCTION"),
+            InstructionType::CINSTRUCTION => {
+                println!("C-INSTRUCTION");
+                let dest = parser.dest();
+                println!("dest = {}, cond =, jmp =", dest);
+            }
         }
     }
 
