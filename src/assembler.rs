@@ -18,16 +18,23 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
         match instruction_type {
             InstructionType::AINSTRUCTION => {
                 println!("A-INSTRUCTION");
-                parser.symbol();
+                let symbol = parser.symbol();
+                println!("symbol: {}", symbol);
             }
             InstructionType::LINSTRUCTION => {
                 println!("L-INSTRUCTION");
-                parser.symbol();
+                let label = parser.symbol();
+                println!("label: {}", label);
             }
             InstructionType::CINSTRUCTION => {
                 println!("C-INSTRUCTION");
                 let dest = parser.dest();
-                println!("dest = {}, cond =, jmp =", dest);
+                let dest_bin = code::dest(&dest);
+                let jump = parser.jump();
+                let jump_bin = code::jump(&jump);
+                println!("dest: {} -> {}", dest, dest_bin);
+                println!("comp: -> ");
+                println!("jump: {} -> {}", jump, jump_bin);
             }
         }
     }

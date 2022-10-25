@@ -95,7 +95,6 @@ impl Parser {
         String::from("")
     }
 
-    // X= or X;
     pub fn dest(&self) -> String {
         if self.instruction_type() != InstructionType::CINSTRUCTION {
             println!("parser::dest, wrong instruction");
@@ -108,18 +107,7 @@ impl Parser {
         let mut symbols: Vec<&str> = vec![];
 
         match line.find("=") {
-            None => {
-                println!("= not found");
-                match line.find(";") {
-                    None => {
-                        println!("; not found");
-                    }
-                    Some(index) => {
-                        println!("; found at {}", index);
-                        symbols = line.split(";").collect();
-                    }
-                }
-            }
+            None => println!("= not found"),
             Some(index) => {
                 println!("= found at {}", index);
                 symbols = line.split("=").collect();
@@ -131,6 +119,32 @@ impl Parser {
         }
 
         String::from(symbols[0])
+    }
+
+    pub fn jump(&self) -> String {
+        if self.instruction_type() != InstructionType::CINSTRUCTION {
+            println!("parser::jump, wrong instruction");
+            return String::from("");
+        }
+
+        // trim line to remove whitespaces
+        let line = &self.lines[self.line_number as usize].trim();
+
+        let mut symbols: Vec<&str> = vec![];
+
+        match line.find(";") {
+            None => println!("= not found"),
+            Some(index) => {
+                println!("; found at {}", index);
+                symbols = line.split(";").collect();
+            }
+        }
+
+        if symbols.is_empty() {
+            return String::from("");
+        }
+
+        String::from(symbols[symbols.len() - 1])
     }
 }
 
@@ -319,12 +333,12 @@ mod tests {
     fn dest_02() {
         let contents = String::from("0;JMP");
         let parser = Parser::new(contents);
-        assert_eq!("0", parser.dest());
+        assert_eq!("", parser.dest());
     }
 
     #[test]
     fn dest_03() {
-        let contents = String::from("@foo"); // wrong instruction
+        let contents = String::from("@foo");
         let parser = Parser::new(contents);
         assert_eq!("", parser.dest());
     }
@@ -343,5 +357,34 @@ M=M+D",
         assert_eq!("", parser.dest()); // wrong instruction
         parser.advance(); // M=M+D
         assert_eq!("M", parser.dest());
+    }
+
+    #[test]
+    fn jump_01() {
+        let contents = String::from("@foo");
+        let parser = Parser::new(contents);
+        assert_eq!("", parser.jump());
+    }
+
+    #[test]
+    fn jump_02() {
+        let contents = String::from("D=M");
+        let parser = Parser::new(contents);
+        assert_eq!("", parser.jump());
+    }
+
+    #[test]
+    fn jump_03() {
+        let contents = String::from("0;JEQ");
+        let parser = Parser::new(contents);
+        assert_eq!("JEQ", parser.jump());
+    }
+
+    #[test]
+    fn dest_and_jmp() {
+        let contents = String::from("D=D+1;JLE");
+        let parser = Parser::new(contents);
+        assert_eq!("D", parser.dest());
+        assert_eq!("JLE", parser.jump());
     }
 }
