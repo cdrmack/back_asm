@@ -121,6 +121,40 @@ impl Parser {
         String::from(symbols[0])
     }
 
+    pub fn comp(&self) -> String {
+        if self.instruction_type() != InstructionType::CINSTRUCTION {
+            println!("parser::comp, wrong instruction");
+            return String::from("");
+        }
+
+        // trim line to remove whitespaces
+        let line = &self.lines[self.line_number as usize].trim();
+
+        //let mut symbols: Vec<&str> = vec![];
+        let mut result = String::from("");
+
+        let dest = line.find("=");
+        let jump = line.find(";");
+
+        if dest.is_some() && jump.is_some() {
+            // D=D+1;JLE
+            let symbols_dest: Vec<&str> = line.split("=").collect();
+            let tmp = String::from(symbols_dest[1]); // D+1;JLE
+            let symbols_jump: Vec<&str> = tmp.split(";").collect();
+            result = String::from(symbols_jump[0]);
+        } else if dest.is_some() {
+            //D=D-M
+            let symbols: Vec<&str> = line.split("=").collect();
+            result = String::from(symbols[1]);
+        } else if jump.is_some() {
+            // D;JGT
+            let symbols: Vec<&str> = line.split(";").collect();
+            result = String::from(symbols[0]);
+        }
+
+        result
+    }
+
     pub fn jump(&self) -> String {
         if self.instruction_type() != InstructionType::CINSTRUCTION {
             println!("parser::jump, wrong instruction");
@@ -357,6 +391,41 @@ M=M+D",
         assert_eq!("", parser.dest()); // wrong instruction
         parser.advance(); // M=M+D
         assert_eq!("M", parser.dest());
+    }
+
+    #[test]
+    fn comp_01() {
+        let contents = String::from("D=M");
+        let parser = Parser::new(contents);
+        assert_eq!("M", parser.comp());
+    }
+
+    #[test]
+    fn comp_02() {
+        let contents = String::from("D=D-M");
+        let parser = Parser::new(contents);
+        assert_eq!("D-M", parser.comp());
+    }
+
+    #[test]
+    fn comp_03() {
+        let contents = String::from("0;JMP");
+        let parser = Parser::new(contents);
+        assert_eq!("0", parser.comp());
+    }
+
+    #[test]
+    fn comp_04() {
+        let contents = String::from("D=M;JMP");
+        let parser = Parser::new(contents);
+        assert_eq!("M", parser.comp());
+    }
+
+    #[test]
+    fn comp_05() {
+        let contents = String::from("D=D+1;JLE");
+        let parser = Parser::new(contents);
+        assert_eq!("D+1", parser.comp());
     }
 
     #[test]

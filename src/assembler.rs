@@ -30,11 +30,18 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
                 println!("C-INSTRUCTION");
                 let dest = parser.dest();
                 let dest_bin = code::dest(&dest);
+                // println!("dest: {} -> {}", dest, dest_bin);
+
+                let comp = parser.comp();
+                let comp_bin = code::comp(&comp);
+                // println!("comp: {} -> {}", comp, comp_bin);
+
                 let jump = parser.jump();
                 let jump_bin = code::jump(&jump);
-                println!("dest: {} -> {}", dest, dest_bin);
-                println!("comp: -> ");
-                println!("jump: {} -> {}", jump, jump_bin);
+                // println!("jump: {} -> {}", jump, jump_bin);
+
+                println!("symbolic: {}:{}:{}", dest, comp, jump);
+                println!("  binary: {}:{}:{}", dest_bin, comp_bin, jump_bin);
             }
         }
     }
