@@ -56,7 +56,7 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
                 write!(
                     file,
                     "{}",
-                    format!("{}{}{}\n", dest_bin, comp_bin, jump_bin)
+                    format!("111{}{}{}\n", dest_bin, comp_bin, jump_bin)
                 );
             }
         }
