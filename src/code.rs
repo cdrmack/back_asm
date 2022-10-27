@@ -25,29 +25,29 @@ pub fn comp(mnemonic: &str) -> String {
         "-1" => binary = "111010",
         "D" => binary = "001100",
         "A" => binary = "110000",
-	"M" => binary = "110000",
+        "M" => binary = "110000",
         "!D" => binary = "001101",
         "!A" => binary = "110001",
-	"!M" => binary = "110001",
+        "!M" => binary = "110001",
         "-D" => binary = "001111",
-	"-A" => binary = "110011",
-	"-M" => binary = "110011",
-	"D+1" => binary = "011111",
-	"A+1" => binary = "110111",
-	"M+1" => binary = "110111",
-	"D-1" => binary = "001110",
-	"A-1" => binary = "110010",
-	"M-1" => binary = "110010",
-	"D+A" => binary = "000010",
-	"D+M" => binary = "000010",
-	"D-A" => binary = "010011",
-	"D-M" => binary = "010011",
-	"A-D" => binary = "000111",
-	"M-D" => binary = "000111",
-	"D&A" => binary = "000000",
-	"D&M" => binary = "000000",
-	"D|A" => binary = "010101",
-	"D|M" => binary = "010101",
+        "-A" => binary = "110011",
+        "-M" => binary = "110011",
+        "D+1" => binary = "011111",
+        "A+1" => binary = "110111",
+        "M+1" => binary = "110111",
+        "D-1" => binary = "001110",
+        "A-1" => binary = "110010",
+        "M-1" => binary = "110010",
+        "D+A" => binary = "000010",
+        "D+M" => binary = "000010",
+        "D-A" => binary = "010011",
+        "D-M" => binary = "010011",
+        "A-D" => binary = "000111",
+        "M-D" => binary = "000111",
+        "D&A" => binary = "000000",
+        "D&M" => binary = "000000",
+        "D|A" => binary = "010101",
+        "D|M" => binary = "010101",
         _ => binary = "",
     }
 
@@ -70,6 +70,52 @@ pub fn jump(mnemonic: &str) -> String {
     }
 
     String::from(binary)
+}
+
+pub fn variable(a_instruction: &str) -> String {
+    let mut binary = "";
+
+    // pre-defined
+    match a_instruction {
+        "R0" => binary = "0000000000000000",
+        "R1" => binary = "0000000000000001",
+        "R2" => binary = "0000000000000010",
+        "R3" => binary = "0000000000000011",
+        "R4" => binary = "0000000000000100",
+        "R5" => binary = "0000000000000101",
+        "R6" => binary = "0000000000000110",
+        "R7" => binary = "0000000000000111",
+        "R8" => binary = "0000000000001000",
+        "R9" => binary = "0000000000001001",
+        "R10" => binary = "0000000000001010",
+        "R11" => binary = "0000000000001011",
+        "R12" => binary = "0000000000001100",
+        "R13" => binary = "0000000000001101",
+        "R14" => binary = "0000000000001110",
+        "R15" => binary = "0000000000001111",
+        "SP" => binary = "0000000000000000",
+        "LCL" => binary = "0000000000000001",
+        "ARG" => binary = "0000000000000010",
+        "THIS" => binary = "0000000000000011",
+        "THAT" => binary = "0000000000000100",
+        "SCREEN" => binary = "0100000000000000",
+        "KBD" => binary = "0110000000000000",
+        _ => binary = "",
+    }
+
+    if binary.is_empty() {
+        match a_instruction.parse::<i32>() {
+            Ok(number) => {
+                return format!("{:016b}", number);
+            }
+            Err(e) => {
+                // TODO
+                return String::from("variable");
+            }
+        }
+    } else {
+        String::from(binary)
+    }
 }
 
 #[cfg(test)]
@@ -205,12 +251,12 @@ mod tests {
     fn comp_a_minus1() {
         assert_eq!("110010", comp("A-1"));
     }
-    
+
     #[test]
     fn comp_m_minus1() {
         assert_eq!("110010", comp("M-1"));
     }
-    
+
     #[test]
     fn comp_d_plus_a() {
         assert_eq!("000010", comp("D+A"));
@@ -220,7 +266,7 @@ mod tests {
     fn comp_d_plus_m() {
         assert_eq!("000010", comp("D+M"));
     }
-    
+
     #[test]
     fn comp_d_minus_a() {
         assert_eq!("010011", comp("D-A"));
@@ -230,7 +276,7 @@ mod tests {
     fn comp_d_minus_m() {
         assert_eq!("010011", comp("D-M"));
     }
-    
+
     #[test]
     fn comp_a_minus_d() {
         assert_eq!("000111", comp("A-D"));
@@ -240,7 +286,7 @@ mod tests {
     fn comp_m_minus_d() {
         assert_eq!("000111", comp("M-D"));
     }
-    
+
     #[test]
     fn comp_d_and_a() {
         assert_eq!("000000", comp("D&A"));
@@ -250,7 +296,7 @@ mod tests {
     fn comp_d_and_m() {
         assert_eq!("000000", comp("D&M"));
     }
-    
+
     #[test]
     fn comp_d_or_a() {
         assert_eq!("010101", comp("D|A"));
@@ -265,7 +311,7 @@ mod tests {
     fn comp_invalid_symbol() {
         assert_eq!("", comp("INVALID_SYMBOL"));
     }
-    
+
     #[test]
     fn jump_null() {
         assert_eq!("000", jump("null"));
@@ -309,5 +355,135 @@ mod tests {
     #[test]
     fn jump_invalid_symbol() {
         assert_eq!("000", dest("INVALID_SYMBOL"));
+    }
+
+    #[test]
+    fn variable_r0() {
+        assert_eq!("0000000000000000", variable("R0"));
+    }
+
+    #[test]
+    fn variable_r1() {
+        assert_eq!("0000000000000001", variable("R1"));
+    }
+
+    #[test]
+    fn variable_r2() {
+        assert_eq!("0000000000000010", variable("R2"));
+    }
+
+    #[test]
+    fn variable_r3() {
+        assert_eq!("0000000000000011", variable("R3"));
+    }
+
+    #[test]
+    fn variable_r4() {
+        assert_eq!("0000000000000100", variable("R4"));
+    }
+
+    #[test]
+    fn variable_r5() {
+        assert_eq!("0000000000000101", variable("R5"));
+    }
+
+    #[test]
+    fn variable_r6() {
+        assert_eq!("0000000000000110", variable("R6"));
+    }
+
+    #[test]
+    fn variable_r7() {
+        assert_eq!("0000000000000111", variable("R7"));
+    }
+
+    #[test]
+    fn variable_r8() {
+        assert_eq!("0000000000001000", variable("R8"));
+    }
+
+    #[test]
+    fn variable_r9() {
+        assert_eq!("0000000000001001", variable("R9"));
+    }
+
+    #[test]
+    fn variable_r10() {
+        assert_eq!("0000000000001010", variable("R10"));
+    }
+
+    #[test]
+    fn variable_r11() {
+        assert_eq!("0000000000001011", variable("R11"));
+    }
+
+    #[test]
+    fn variable_r12() {
+        assert_eq!("0000000000001100", variable("R12"));
+    }
+
+    #[test]
+    fn variable_r13() {
+        assert_eq!("0000000000001101", variable("R13"));
+    }
+
+    #[test]
+    fn variable_r14() {
+        assert_eq!("0000000000001110", variable("R14"));
+    }
+
+    #[test]
+    fn variable_r15() {
+        assert_eq!("0000000000001111", variable("R15"));
+    }
+
+    #[test]
+    fn variable_sp() {
+        assert_eq!("0000000000000000", variable("SP"));
+    }
+
+    #[test]
+    fn variable_lcl() {
+        assert_eq!("0000000000000001", variable("LCL"));
+    }
+
+    #[test]
+    fn variable_arg() {
+        assert_eq!("0000000000000010", variable("ARG"));
+    }
+
+    #[test]
+    fn variable_this() {
+        assert_eq!("0000000000000011", variable("THIS"));
+    }
+
+    #[test]
+    fn variable_that() {
+        assert_eq!("0000000000000100", variable("THAT"));
+    }
+
+    #[test]
+    fn variable_screen() {
+        assert_eq!("0100000000000000", variable("SCREEN"));
+    }
+
+    #[test]
+    fn variable_kbd() {
+        assert_eq!("0110000000000000", variable("KBD"));
+    }
+
+    #[test]
+    fn variable_42() {
+        assert_eq!("0000000000101010", variable("42"));
+    }
+
+    #[test]
+    fn variable_8() {
+        assert_eq!("0000000000001000", variable("8"));
+    }
+
+    #[test]
+    fn variable_16() {
+        assert_eq!("0000000000010000", variable("16"));
     }
 }
