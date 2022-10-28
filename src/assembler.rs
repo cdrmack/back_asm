@@ -9,18 +9,23 @@ use crate::parser;
 use crate::parser::InstructionType;
 
 pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
-    let contents = fs::read_to_string(config.filename)?;
+    let mut output_filename = String::from("");
 
-    let output_filename = "prog.hack"; // TODO
-
-    File::create(output_filename)?;
+    if config.filename.find(".").is_some() {
+        let filename: Vec<&str> = config.filename.split(".").collect();
+        output_filename = format!("{}.hack", filename[0]);
+    } else {
+        output_filename = format!("{}.hack", config.filename);
+    }
 
     let mut file = fs::OpenOptions::new()
+        .create(true)
         .write(true)
         .append(true)
         .open(output_filename)
         .unwrap();
 
+    let contents = fs::read_to_string(config.filename)?;
     let mut parser = parser::Parser::new(contents);
 
     while parser.has_more_lines() {
