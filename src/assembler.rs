@@ -1,6 +1,5 @@
 use std::error::Error;
 use std::fs;
-use std::fs::File;
 use std::io::Write;
 
 use crate::code;
@@ -9,7 +8,7 @@ use crate::parser;
 use crate::parser::InstructionType;
 
 pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
-    let mut output_filename = String::from("");
+    let output_filename: String;
 
     if config.filename.find(".").is_some() {
         let filename: Vec<&str> = config.filename.split(".").collect();
@@ -37,7 +36,7 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
                 println!("A-INSTRUCTION");
                 let symbol = parser.symbol();
                 println!("symbol: {}", symbol);
-                write!(file, "{}", format!("{}\n", code::variable(&symbol)));
+                write!(file, "{}", format!("{}\n", code::variable(&symbol)))?;
             }
             InstructionType::LINSTRUCTION => {
                 println!("L-INSTRUCTION");
@@ -62,7 +61,7 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
                     file,
                     "{}",
                     format!("111{}{}{}\n", dest_bin, comp_bin, jump_bin)
-                );
+                )?;
             }
         }
     }

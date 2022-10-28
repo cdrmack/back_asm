@@ -1,5 +1,5 @@
 pub fn dest(mnemonic: &str) -> String {
-    let mut binary = "";
+    let binary: &str;
 
     match mnemonic {
         "null" => binary = "000",
@@ -17,7 +17,7 @@ pub fn dest(mnemonic: &str) -> String {
 }
 
 pub fn comp(mnemonic: &str) -> String {
-    let mut binary = "";
+    let binary: &str;
 
     match mnemonic {
         "0" => binary = "0101010",
@@ -55,7 +55,7 @@ pub fn comp(mnemonic: &str) -> String {
 }
 
 pub fn jump(mnemonic: &str) -> String {
-    let mut binary = "";
+    let binary: &str;
 
     match mnemonic {
         "null" => binary = "000",
@@ -73,7 +73,7 @@ pub fn jump(mnemonic: &str) -> String {
 }
 
 pub fn variable(a_instruction: &str) -> String {
-    let mut binary = "";
+    let binary: &str;
 
     // pre-defined
     match a_instruction {
@@ -104,18 +104,16 @@ pub fn variable(a_instruction: &str) -> String {
     }
 
     if binary.is_empty() {
-        match a_instruction.parse::<i32>() {
-            Ok(number) => {
-                return format!("{:016b}", number);
-            }
-            Err(e) => {
-                // TODO
-                return String::from("variable");
-            }
+        let parsed = a_instruction.parse::<i32>();
+        if parsed.is_ok() {
+            return format!("{:016b}", parsed.unwrap());
+        } else {
+            // TODO
+            return String::from("variable");
         }
-    } else {
-        String::from(binary)
     }
+
+    String::from(binary)
 }
 
 #[cfg(test)]
