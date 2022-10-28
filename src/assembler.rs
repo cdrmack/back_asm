@@ -33,9 +33,9 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
 
         match instruction_type {
             InstructionType::AINSTRUCTION => {
-                println!("A-INSTRUCTION");
+                // println!("A-INSTRUCTION");
                 let symbol = parser.symbol();
-                println!("symbol: {}", symbol);
+                // println!("symbol: {}", symbol);
                 write!(file, "{}", format!("{}\n", code::variable(&symbol)))?;
             }
             InstructionType::LINSTRUCTION => {
@@ -45,7 +45,7 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
                 // TODO
             }
             InstructionType::CINSTRUCTION => {
-                println!("C-INSTRUCTION");
+                // println!("C-INSTRUCTION");
                 let dest = parser.dest();
                 let dest_bin = code::dest(&dest);
 
@@ -55,8 +55,8 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
                 let jump = parser.jump();
                 let jump_bin = code::jump(&jump);
 
-                println!("symbolic: {}:{}:{}", dest, comp, jump);
-                println!("  binary: {}:{}:{}", dest_bin, comp_bin, jump_bin);
+                // println!("symbolic: {}:{}:{}", dest, comp, jump);
+                // println!("  binary: {}:{}:{}", dest_bin, comp_bin, jump_bin);
                 write!(
                     file,
                     "{}",

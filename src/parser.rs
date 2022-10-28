@@ -106,12 +106,8 @@ impl Parser {
 
         let mut symbols: Vec<&str> = vec![];
 
-        match line.find("=") {
-            None => println!("= not found"),
-            Some(index) => {
-                println!("= found at {}", index);
-                symbols = line.split("=").collect();
-            }
+        if line.find("=").is_some() {
+            symbols = line.split("=").collect();
         }
 
         if symbols.is_empty() {
@@ -166,12 +162,8 @@ impl Parser {
 
         let mut symbols: Vec<&str> = vec![];
 
-        match line.find(";") {
-            None => println!("= not found"),
-            Some(index) => {
-                println!("; found at {}", index);
-                symbols = line.split(";").collect();
-            }
+        if line.find(";").is_some() {
+            symbols = line.split(";").collect();
         }
 
         if symbols.is_empty() {
