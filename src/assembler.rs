@@ -27,8 +27,11 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.filename)?;
     let mut parser = parser::Parser::new(contents);
 
-    while parser.has_more_lines() {
-        parser.advance();
+    if parser.lines.len() == 0 {
+        return Ok(()); // TODO, return error
+    }
+
+    loop {
         let instruction_type = parser.instruction_type();
 
         match instruction_type {
@@ -39,9 +42,9 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
                 write!(file, "{}", format!("{}\n", code::variable(&symbol)))?;
             }
             InstructionType::LINSTRUCTION => {
-                println!("L-INSTRUCTION");
+                // println!("L-INSTRUCTION");
                 let label = parser.symbol();
-                println!("label: {}", label);
+                // println!("label: {}", label);
                 // TODO
             }
             InstructionType::CINSTRUCTION => {
@@ -55,15 +58,21 @@ pub fn assembly(config: config::Config) -> Result<(), Box<dyn Error>> {
                 let jump = parser.jump();
                 let jump_bin = code::jump(&jump);
 
-                // println!("symbolic: {}:{}:{}", dest, comp, jump);
-                // println!("  binary: {}:{}:{}", dest_bin, comp_bin, jump_bin);
+                // println!("symbolic: {}:{}:{}", comp, dest, jump);
+                // println!("  binary: {}:{}:{}", comp_bin, dest_bin, jump_bin);
                 write!(
                     file,
                     "{}",
-                    format!("111{}{}{}\n", dest_bin, comp_bin, jump_bin)
+                    format!("111{}{}{}\n", comp_bin, dest_bin, jump_bin)
                 )?;
             }
         }
+
+        if parser.has_more_lines() != true {
+            break;
+        }
+
+        parser.advance();
     }
 
     Ok(())

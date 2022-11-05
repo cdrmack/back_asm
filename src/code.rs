@@ -1,15 +1,24 @@
 pub fn dest(mnemonic: &str) -> String {
     let binary: &str;
 
+    // TODO: sort to handle XY and YX?
     match mnemonic {
         "null" => binary = "000",
         "M" => binary = "001",
         "D" => binary = "010",
         "DM" => binary = "011",
+        "MD" => binary = "011",
         "A" => binary = "100",
         "AM" => binary = "101",
+        "MA" => binary = "101",
         "AD" => binary = "110",
+        "DA" => binary = "110",
         "ADM" => binary = "111",
+        "AMD" => binary = "111",
+        "DMA" => binary = "111",
+        "DAM" => binary = "111",
+        "MDA" => binary = "111",
+        "MAD" => binary = "111",
         _ => binary = "000",
     }
 
@@ -141,6 +150,11 @@ mod tests {
     }
 
     #[test]
+    fn dest_md() {
+        assert_eq!("011", dest("MD"));
+    }
+
+    #[test]
     fn dest_a() {
         assert_eq!("100", dest("A"));
     }
@@ -151,13 +165,48 @@ mod tests {
     }
 
     #[test]
+    fn dest_ma() {
+        assert_eq!("101", dest("MA"));
+    }
+
+    #[test]
     fn dest_ad() {
         assert_eq!("110", dest("AD"));
     }
 
     #[test]
+    fn dest_da() {
+        assert_eq!("110", dest("DA"));
+    }
+
+    #[test]
     fn dest_adm() {
         assert_eq!("111", dest("ADM"));
+    }
+
+    #[test]
+    fn dest_amd() {
+        assert_eq!("111", dest("AMD"));
+    }
+
+    #[test]
+    fn dest_dam() {
+        assert_eq!("111", dest("DAM"));
+    }
+
+    #[test]
+    fn dest_dma() {
+        assert_eq!("111", dest("DMA"));
+    }
+
+    #[test]
+    fn dest_mda() {
+        assert_eq!("111", dest("MDA"));
+    }
+
+    #[test]
+    fn dest_mad() {
+        assert_eq!("111", dest("MAD"));
     }
 
     #[test]

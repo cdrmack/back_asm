@@ -13,7 +13,7 @@ fn main() {
         process::exit(1);
     });
 
-    println!("Input file: {}", config.filename);
+    // println!("Input file: {}", config.filename);
 
     if let Err(e) = assembler::assembly(config) {
         println!("Application error: {}", e);
